@@ -71,8 +71,6 @@ const shopRoutes = require('./routes/shop.js');
 const authRoutes = require('./routes/auth.js');
 
 
-
-
 // order does matter for the use methodes
 
 //app.use(bodyParser.urlencoded({extended: false}));

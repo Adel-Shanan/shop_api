@@ -131,6 +131,7 @@ exports.postSignup = async (req, res , next ) => {
 
         const result = await user.save();
     
+        /*
         
         await transport.sendMail({
             to: email,
@@ -138,6 +139,8 @@ exports.postSignup = async (req, res , next ) => {
             subject: 'Signup message to AA Shop',
             html: '<h1>welcome to our shop</h1>'
         });
+
+        */
 
         res.status(201).json({
             message: 'User created!',
