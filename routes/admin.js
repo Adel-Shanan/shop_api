@@ -41,6 +41,7 @@ router.post('/edit-product',adminValidators.editProductValidator,isAuth,adminCon
 
 router.delete( '/product/:productId',isAuth, adminController.deleteProduct );
 
+*/
+
 module.exports = router ; // or you can use ===> exports.routes = router;
 
-*/

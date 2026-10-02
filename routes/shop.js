@@ -36,4 +36,4 @@ const router = express.Router();
 
 // router.get('/orders/:orderId', isAuth, shopController.getInvoice);
 
-// module.exports = router ;
+module.exports = router ;

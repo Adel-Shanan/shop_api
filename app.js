@@ -69,7 +69,7 @@ const storage = new CloudinaryStorage({
 const adminRoutes = require('./routes/admin.js');
 const shopRoutes = require('./routes/shop.js');
 const authRoutes = require('./routes/auth.js');
-const errorRoutes = require('./routes/errors.js');
+
 
 
 
@@ -89,9 +89,6 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // we can use wildcard
     next();
 })
-
-
-
 
 
 //Now only routes starting with  /admin  will go into the admin routes file
