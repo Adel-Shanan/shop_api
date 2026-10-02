@@ -75,7 +75,8 @@ const authRoutes = require('./routes/auth.js');
 
 // order does matter for the use methodes
 
-app.use(bodyParser.urlencoded({extended: false}));
+//app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json()); // application/json
 app.use(multer({storage:storage}).single('image'))
 
 //app.use(express.static(path.join(__dirname, 'public')));
