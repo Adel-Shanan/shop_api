@@ -67,8 +67,6 @@ exports.getIndex =  async (req, res , next ) => {
 
 
 
-
-
 exports.getProducts = async (req, res , next ) => {
 
   const currentPage = +req.query.page || 1;

@@ -46,13 +46,14 @@ app.use(helmet(
 app.use(compression());
 
 
-const accessLogStream = fs.createWriteStream(
-    path.join(__dirname, 'access.log'),
-    { flags: 'a' }
-);
+if (process.env.NODE_ENV !== 'production') {
+    const accessLogStream = fs.createWriteStream(
+        path.join(__dirname, 'access.log'),
+        { flags: 'a' }
+    );
 
-app.use(morgan('combined', { stream: accessLogStream }));
-
+    app.use(morgan('combined', {stream: accessLogStream}));
+}
 
 /*
 (process.env.NODE_ENV)
