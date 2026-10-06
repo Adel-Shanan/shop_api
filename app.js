@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -42,8 +44,14 @@ app.use(helmet(
   })
 );
 app.use(compression());
-app.use(morgan('combined'));
 
+
+const accessLogStream = fs.createWriteStream(
+    path.join(__dirname, 'access.log'),
+    { flags: 'a' }
+);
+
+app.use(morgan('combined', { stream: accessLogStream }));
 
 
 /*

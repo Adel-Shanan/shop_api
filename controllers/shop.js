@@ -12,47 +12,93 @@ const Order = require('../models/order.js');
 
 
 
-// const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 1;
 
 
-// exports.getProducts = async (req, res , next ) => {
 
 
- 
-//   const page = +req.query.page || 1;
-//   let totalItems;
 
-//   try {
 
-//     const numProducts = await Product.find().countDocuments();
 
-//     totalItems = numProducts;
-
-//     const products = await Product.find().skip( (page - 1) * ITEMS_PER_PAGE ).limit(ITEMS_PER_PAGE);
-
-//     res.render('shop/products-list.ejs', {
-//       prods: products,
-//       pageTitle:'All Products',
-//       path: '/products',
-//       currentPage: page,
-//       hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-//       hasPreviousPage: page > 1,
-//       nextPage: page + 1,
-//       previousPage: page - 1,
-//       lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-//     });
+exports.getIndex =  async (req, res , next ) => {
     
-//   }
+    const currentPage = +req.query.page || 1;
 
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   }
+    try {
+        const totalItems = await Product.find().countDocuments();
+
+        const products = await Product.find()
+                            //.populate('userId')
+                            .skip( (currentPage - 1) * ITEMS_PER_PAGE )
+                            .limit(ITEMS_PER_PAGE);
+
+        res.status(200).json({
+            message: 'Fetched Products successfully',
+            products: products,
+            totalItems: totalItems,
+            currentPage: currentPage,
+            itemsPerPage: ITEMS_PER_PAGE,
+            totalPages: Math.ceil(totalItems / ITEMS_PER_PAGE)
+        })
+
+    }
+    catch ( err ) {
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.getProducts = async (req, res , next ) => {
+
+  const currentPage = +req.query.page || 1;
+
+  try {
+    const totalItems = await Product.find().countDocuments();
+
+    const products = await Product.find()
+                           //.populate('userId')
+                           .skip( (currentPage - 1) * ITEMS_PER_PAGE )
+                           .limit(ITEMS_PER_PAGE);
+
+    res.status(200).json({
+        message: 'Fetched Products successfully',
+        products: products,
+        totalItems: totalItems,
+        currentPage: currentPage,
+        itemsPerPage: ITEMS_PER_PAGE,
+        totalPages: Math.ceil(totalItems / ITEMS_PER_PAGE)
+    })
+        
+  }
+  catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
   
-// };
+};
 
 
 
@@ -65,44 +111,35 @@ const Order = require('../models/order.js');
 
 
 
+exports.getProduct = async (req, res, next ) => {
+  const prodId = req.params.productId;
 
-
-
-
-
-
-
-// exports.getProduct = async (req, res, next ) => {
-//   const prodId = req.params.productId;
-
-//   try {
-//     const product = await Product.findById(prodId);
+  try {
+    const product = await Product.findById(prodId);
     
-//     res.render('shop/product-details.ejs', {
-//       product: product,
-//       pageTitle: product.title + ' Details',
-//       path: '/products'
-//     });
-//   }
+    if(!product){
+        const error = new Error('Could not find product.');
+        error.statusCode = 404;
 
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   }
+        throw error;
+    }
 
-// };
+    res.status(200).json({
+        message: 'Product Fetched',
+        product: product
+    })
 
+  }
 
+  catch( err ) {
+    //Well when we call next with an error passed as an argument, then we actually let express know that
+    // an error occurred and it will skip all other middlewares and move right away to an error handling
+    const error = new Error(err)
+    error.httpStatusCode = 500;
+    return next(error)
+  }
 
-
-
-
-
-
-
+};
 
 
 
@@ -110,39 +147,11 @@ const Order = require('../models/order.js');
 
 
 
-// exports.getIndex =  async (req, res , next ) => {
 
-//   const page = +req.query.page || 1;
-//   let totalItems;
 
-//   try { 
-//     const numProducts = await Product.find().countDocuments();
 
-//     totalItems = numProducts;
 
-//     const products = await Product.find().skip( (page - 1) * ITEMS_PER_PAGE ).limit(ITEMS_PER_PAGE);
- 
-//     res.render('shop/index.ejs', {
-//       prods: products,
-//       pageTitle:'Shop',
-//       path: '/',
-//       currentPage: page,
-//       hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-//       hasPreviousPage: page > 1,
-//       nextPage: page + 1,
-//       previousPage: page - 1,
-//       lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-//     });
-//   }
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
-  
-// };
+
 
 
 
@@ -305,7 +314,7 @@ const Order = require('../models/order.js');
 //     const order = new Order({ 
 //       user: {
 //         email: req.user.email,
-//         userId: req.user._id
+//         userId: req.userId
 //       },
 //       items: products
 //     });
@@ -360,7 +369,7 @@ const Order = require('../models/order.js');
 //     const order = new Order({ 
 //       user: {
 //         email: req.user.email,
-//         userId: req.user._id
+//         userId: req.userId
 //       },
 //       items: products
 //     });
@@ -401,7 +410,7 @@ const Order = require('../models/order.js');
 
 //   try { 
 
-//     const orders = await Order.find({ 'user.userId': req.user._id });
+//     const orders = await Order.find({ 'user.userId': req.userId });
   
 //     console.log(orders);
 //     res.render('shop/orders.ejs', {
@@ -521,7 +530,7 @@ const Order = require('../models/order.js');
 //       return next(new Error('No order Found'));
 //     }
 
-//     if(order.user.userId.toString() !== req.user._id.toString()){
+//     if(order.user.userId.toString() !== req.userId.toString()){
 //       return next(new Error('unauthorized'));
 //     }
 

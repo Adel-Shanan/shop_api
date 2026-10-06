@@ -1,4 +1,3 @@
-
 const crypto = require('crypto');
 
 const jwt = require('jsonwebtoken');
@@ -19,6 +18,69 @@ const transport = nodemailer.createTransport(sendgridTransport({
     }
 }));
 
+
+
+
+exports.postSignup = async (req, res , next ) => {
+
+    const errors = validationResult(req);
+
+    console.log(errors);
+
+    if(!errors.isEmpty()){
+        const error = new Error('Validation failed, entered signup data is not correct')
+        error.statusCode = 422;
+        error.data = errors.array(); // we didnt do that before but this would allow me to keep my errors which were retrieved by that validation package
+
+        throw error;
+    }
+
+    console.log('just looking for bugs');
+
+    //make sure you check your view, how these inputs are named because you retrieve the values on request body by these names,
+    const email = req.body.email;
+    const password = req.body.password;
+
+    
+    try {
+
+        // this is an asynchronous task and therefore this gives us back a promise
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        const user = new User({
+            email: email,
+            password: hashedPassword,
+            cart: {items: []}
+        });
+
+
+        const result = await user.save();
+    
+        /*
+        
+        await transport.sendMail({
+            to: email,
+            from: 'robo513adel@gmail.com', // i have to use the verified email in sendgrid حصرا
+            subject: 'Signup message to AA Shop',
+            html: '<h1>welcome to our shop</h1>'
+        });
+
+        */
+
+        res.status(201).json({
+            message: 'User created!',
+            userId: result._id
+        })
+
+    }
+    catch (err) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+
+};
 
 
 
@@ -96,87 +158,10 @@ exports.postLogin = async (req, res , next ) => {
 
 
 
-exports.postSignup = async (req, res , next ) => {
-
-    const errors = validationResult(req);
-
-    console.log(errors);
-
-    if(!errors.isEmpty()){
-        const error = new Error('Validation failed, entered signup data is not correct')
-        error.statusCode = 422;
-        error.data = errors.array(); // we didnt do that before but this would allow me to keep my errors which were retrieved by that validation package
-
-        throw error;
-    }
-
-    console.log('just looking for bugs');
-
-    //make sure you check your view, how these inputs are named because you retrieve the values on request body by these names,
-    const email = req.body.email;
-    const password = req.body.password;
-
-    
-    try {
-
-        // this is an asynchronous task and therefore this gives us back a promise
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        const user = new User({
-            email: email,
-            password: hashedPassword,
-            cart: {items: []}
-        });
-
-
-        const result = await user.save();
-    
-        /*
-        
-        await transport.sendMail({
-            to: email,
-            from: 'robo513adel@gmail.com', // i have to use the verified email in sendgrid حصرا
-            subject: 'Signup message to AA Shop',
-            html: '<h1>welcome to our shop</h1>'
-        });
-
-        */
-
-        res.status(201).json({
-            message: 'User created!',
-            userId: result._id
-        })
-
-    }
-    catch (err) {
-        if(!err.statusCode){
-            err.statusCode = 500;
-        }
-        next(err);
-    }
-
-};
-
-
 
 
 
 /*
-
-
-
-
-exports.postLogout = (req, res , next ) => {
-
-    req.session.destroy((err) => {
-        console.log(err);
-        res.redirect('/');
-    })
-};
-
-
-
-
 
 
 

@@ -1,4 +1,3 @@
-
 const express = require('express');
 
 const { check, body } = require('express-validator');
@@ -14,11 +13,9 @@ const isAuth = require('../middleware/is-auth.js');
 const router = express.Router();
 
 
-/*
 
-// Implicitly, this route is reached under /admin/add-product for get reguests
-router.get( '/add-product', isAuth, adminController.getAddProduct );
 
+router.get( '/products',isAuth, adminController.getProducts );
 
 
 // Implicitly, this route is reached under /admin/add-product  for post requests
@@ -26,22 +23,13 @@ router.get( '/add-product', isAuth, adminController.getAddProduct );
 router.post('/add-product',adminValidators.addProductValidator,isAuth,adminController.postAddProduct );
 
 
-
-router.get( '/products',isAuth, adminController.getProducts );
-
-
-
-router.get( '/edit-product/:productId',isAuth, adminController.getEditProduct );
-
-
-
-router.post('/edit-product',adminValidators.editProductValidator,isAuth,adminController.postEditProduct );
+router.put('/edit-product/:productId',adminValidators.editProductValidator,isAuth,adminController.editProduct );
 
 
 
 router.delete( '/product/:productId',isAuth, adminController.deleteProduct );
 
-*/
+
 
 module.exports = router ; // or you can use ===> exports.routes = router;
 
