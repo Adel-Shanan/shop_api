@@ -1,12 +1,13 @@
 require('dotenv').config();
 
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./swagger.yaml');
-
 
 const fs = require('fs');
 const path = require('path');
+
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
+
 
 const express = require('express');
 const bodyParser = require('body-parser');
