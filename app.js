@@ -34,7 +34,7 @@ const app = express();
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-
+/*
 app.use(helmet(
   {
     contentSecurityPolicy: {
@@ -50,6 +50,13 @@ app.use(helmet(
     },
   })
 );
+
+*/
+
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
+
 app.use(compression());
 
 
