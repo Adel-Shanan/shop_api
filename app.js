@@ -1,5 +1,10 @@
 require('dotenv').config();
 
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./swagger.yaml');
+
+
 const fs = require('fs');
 const path = require('path');
 
@@ -8,7 +13,6 @@ const bodyParser = require('body-parser');
 
 
 const mongoose = require('mongoose');
-
 
 
 const multer = require('multer');
@@ -27,6 +31,8 @@ const MONGODB_URI =  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONG
 
 const app = express();
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 app.use(helmet(
   {
@@ -44,6 +50,8 @@ app.use(helmet(
   })
 );
 app.use(compression());
+
+
 
 
 if (process.env.NODE_ENV !== 'production') {

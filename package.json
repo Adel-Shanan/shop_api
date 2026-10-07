@@ -42,6 +42,8 @@
     "pdfkit": "^0.20.2",
     "pug": "^3.0.3",
     "sequelize": "^6.37.7",
-    "stripe": "^22.6.2"
+    "stripe": "^22.6.2",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   }
 }
