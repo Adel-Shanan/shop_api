@@ -18,47 +18,19 @@ const ITEMS_PER_PAGE = 1;
 
 
 
-
+/*
 
 exports.getIndex =  async (req, res , next ) => {
     
-    const currentPage = +req.query.page || 1;
-
     try {
-        const totalItems = await Product.find().countDocuments();
-
-        const products = await Product.find()
-                            //.populate('userId')
-                            .skip( (currentPage - 1) * ITEMS_PER_PAGE )
-                            .limit(ITEMS_PER_PAGE);
-
-        res.status(200).json({
-            message: 'Fetched Products successfully',
-            products: products,
-            totalItems: totalItems,
-            currentPage: currentPage,
-            itemsPerPage: ITEMS_PER_PAGE,
-            totalPages: Math.ceil(totalItems / ITEMS_PER_PAGE)
-        })
-
+       
     }
     catch ( err ) {
-            if(!err.statusCode){
-                err.statusCode = 500;
-            }
-            next(err);
-        };
+    
+    };
 };
 
-
-
-
-
-
-
-
-
-
+*/
 
 
 
