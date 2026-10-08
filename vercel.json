@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app.js": {
+      "includeFiles": "node_modules/swagger-ui-dist/{swagger-ui-bundle.js,swagger-ui-standalone-preset.js,swagger-ui.css,favicon-16x16.png,favicon-32x32.png,oauth2-redirect.html}"
+    }
+  }
+}
