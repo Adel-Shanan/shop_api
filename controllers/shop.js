@@ -6,6 +6,7 @@ const stripe = require('stripe')(process.env.STRIPE_KEY); // always keep this pr
 const PDFDocument = require('pdfkit');
 
 const Product = require('../models/product.js');
+const User = require('../models/user.js');
 const Order = require('../models/order.js');
 
 
@@ -100,14 +101,191 @@ exports.getProduct = async (req, res, next ) => {
     })
 
   }
+  catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
 
-  catch( err ) {
-    //Well when we call next with an error passed as an argument, then we actually let express know that
-    // an error occurred and it will skip all other middlewares and move right away to an error handling
-    const error = new Error(err)
-    error.httpStatusCode = 500;
-    return next(error)
-  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.postCart = async (req, res, next) => {
+    
+  
+    try { 
+        
+        const prodId = req.body.productId;
+        
+        const product = await Product.findById(prodId);
+
+        if(!product){
+            const error = new Error('Could not find product.');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const user = await User.findById(req.userId);
+
+         if(!user){
+            const error = new Error('A user with this email could not be found');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        
+        const result = await user.addToCart(product);
+
+        console.log(result);
+        
+        res.status(201).json({
+            message:'the product has been added to the cart!',
+            product: product
+        });
+    }
+    catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.getCart = async (req, res, next) => {
+    
+    try {
+        const user = await User.findById(req.userId).populate('cart.items.productId');
+
+        if(!user){
+            const error = new Error('A user with this email could not be found');
+            error.statusCode = 401;
+            throw error;
+        }
+
+        const products = user.cart.items;
+        //console.log(products);
+
+
+        res.status(200).json({
+            message: 'Cart Fetched Successfully',
+            products: products
+        })
+    }
+    catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
+
+  // My approach by implementing my own method in the user model to load the cart 
+
+  // try { 
+  // const user = await User.find({_id: req.userId});
+
+  // const products = await user.getCart();
+
+  // res.status(200).json({
+  //         message: 'Cart Fetched Successfully',
+  //         products: products
+  //     })
+  // }
+
+  //   catch ( err ) {
+  //         if(!err.statusCode){
+  //             err.statusCode = 500;
+  //         }
+  //         next(err);
+  //     };
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.deleteCartItem = async (req, res, next) => {
+
+
+    try {
+        const prodId = req.body.productId;
+
+        const user = await User.findById(req.userId);
+
+        if(!user){
+            const error = new Error('A user with this email could not be found');
+            error.statusCode = 401;
+            throw error;
+        }
+
+
+        const result = await user.deleteFromCart(prodId);
+        //console.log(result);
+        
+
+        res.status(200).json({message: 'Product deleted from the cart successfully'})
+
+    }
+    catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
 
 };
 
@@ -134,175 +312,110 @@ exports.getProduct = async (req, res, next ) => {
 
 
 
+// exports.createCheckoutSession = async (req, res, next) => {  
 
 
-
-
-
-
-// exports.getCart = async (req, res, next) => {
-
-//   try {
-//     const user = await req.user.populate('cart.items.productId');
     
-//     const products = user.cart.items;
-//     //console.log(products);
-//     res.render('shop/cart.ejs', {
-//       pageTitle:'Your Cart',
-//       path: '/cart',
-//       products: products
-//     });
-//   }
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
+//     let products;
+//     let total = 0;
 
-//   // My approach by implementing my own method in the user model to load the cart 
+//     try { 
 
-//   // try { 
-//   // const products = await req.user.getCart();
+//         const user = await User.findById(req.userId).populate('cart.items.productId');
 
-//   //   res.render('shop/cart.ejs', {
-//   //     pageTitle:'Your Cart',
-//   //     path: '/cart',
-//   //     products: products
-//   //   });
-//   // }
+//         if(!user){
+//             const error = new Error('A user with this email could not be found');
+//             error.statusCode = 401;
+//             throw error;
+//         }
 
-//   //  catch( err ) {
-//   //  //Well when we call next with an error passed as an argument, then we actually let express know that
-//   //  // an error occurred and it will skip all other middlewares and move right away to an error handling
-//   //  const error = new Error(err)
-//   //  error.httpStatusCode = 500;
-//   //  return next(error)
-//   // };
+//         products = user.cart.items;
 
+//         if (products.length === 0) {
+//             const error = new Error('Your cart is empty');
+//             error.statusCode = 400;
+//             throw error;
+//         }
 
-// };
+//         total = 0;
 
+//         products.forEach(p => {
+//             total += p.quantity * p.productId.price;
+//         });
 
 
+//         const frontendUrl = process.env.FRONTEND_URL;
 
+//         if (!frontendUrl) {
+//             throw new Error('FRONTEND_URL is not configured');
+//         }
 
+//         const baseUrl = frontendUrl.replace(/\/+$/, '');
 
+//         const session = await stripe.checkout.sessions.create({
 
+//             payment_method_types: ['card'],
+//             mode: 'payment',
+//             line_items: products.map(p => {
+//                 return {
 
+//                     price_data:{
+                        
+//                         product_data: {
+//                             name: p.productId.title,
+//                             description: p.productId.description
+//                         },
 
+//                         currency: 'usd',
 
+//                         unit_amount:p.productId.price * 100
 
+//                     },
 
+//                     quantity: p.quantity
+//                 };
 
+//             }),
 
+//             client_reference_id: user._id.toString(),
 
 
+//             /*            NOTE VIDEO 357
+//             Relying only on `success_url` is insecure since users can access it without paying.
+//             For production, use Stripe **Webhooks** to verify successful payments; on localhost, manual verification via the Stripe Dashboard is sufficient.
+//             */
 
 
+//             /*
+//             success_url: `${baseUrl}/checkout/success` + '?session_id={CHECKOUT_SESSION_ID}',
 
+//             cancel_url: `${baseUrl}/checkout/cancel`
+//             */
 
-// exports.postCart = async (req, res, next) => {
-//   const prodId = req.body.productId;
+            
+//             success_url: req.protocol + '://' + req.get('host') + '/checkout/success',    // => http://localhost:3000
+//             cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+            
+//         });
 
-//   try { 
-//     const product = await Product.findById(prodId);
-    
-//     const result = await req.user.addToCart(product);
 
-//     console.log(result);
-//     res.redirect('/cart');
-//   }
-//   catch( err )  {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
+//         res.status(201).json({
+//             message: 'Checkout session created successfully',
+//             products: products,
+//             totalSum: total,
+//             sessionId: session.id,
+//             checkoutUrl: session.url,
+//             stripePublishableKey: process.env.STRIPE_PUBLISH_KEY
+//         })
 
-// };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// exports.postCartDeleteProduct = async (req, res, next) => {
-
-//   const prodId = req.body.productId;
-
-//   try {
-//     const result = await req.user.deleteFromCart(prodId);
-  
-//     //console.log(result);
-//     res.redirect('/cart');
-//   }
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
-
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// exports.getCheckoutSuccess = async (req, res, next) => {
-
-//   try { 
-//     const user = await req.user.populate('cart.items.productId');
-
-//     const products = user.cart.items.map(i => {
-//       return ({ product: { ...i.productId }, quantity: i.quantity }); // here productId  is the name of the whole product data because we named it like that in the user model .. just to keep in mind 
-//     })
-      
-//     const order = new Order({ 
-//       user: {
-//         email: req.user.email,
-//         userId: req.userId
-//       },
-//       items: products
-//     });
-
-//     const result = await order.save();
-  
-//     req.user.cart = { items: [] };
-//     const result2 = await req.user.save();
-    
-//     res.redirect('/orders');
-//   }
-//   catch( err )  {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
+//     }
+//     catch ( err ) {
+//         if(!err.statusCode){
+//             err.statusCode = 500;
+//         }
+//         next(err);
+//     };
 // };
 
 
@@ -326,159 +439,107 @@ exports.getProduct = async (req, res, next ) => {
 
 
 
-// // after video 357 we didnt use it , although we copu paste it and named it getCheckoutSuccess
+
+// // this is as like ( getCheckoutSuccess )
+
 // exports.postOrder = async (req, res, next) => {
 
-//   try { 
-//     const user = await req.user.populate('cart.items.productId');
+//     try { 
+//         const user = await User.findById(req.userId).populate('cart.items.productId');
 
-//     const products = user.cart.items.map(i => {
-//         return ({ product: { ...i.productId }, quantity: i.quantity }); // here productId  is the name of the whole product data because we named it like that in the user model .. just to keep in mind 
-//       })
+//         if(!user){
+//             const error = new Error('A user with this email could not be found');
+//             error.statusCode = 401;
+//             throw error;
+//         }
 
-//     const order = new Order({ 
-//       user: {
-//         email: req.user.email,
-//         userId: req.userId
-//       },
-//       items: products
-//     });
-
-//     const result = await order.save();
-  
-//     req.user.cart = { items: [] };
-//     const result2 = await req.user.save();
-  
-//     res.redirect('/orders');
-//   }
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   }
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// exports.getOrders = async (req, res, next) => {
-
-//   try { 
-
-//     const orders = await Order.find({ 'user.userId': req.userId });
-  
-//     console.log(orders);
-//     res.render('shop/orders.ejs', {
-//       pageTitle:'Your Orders',
-//       path: '/orders',
-//       orders: orders
-//     });
-//   }
-//   catch( err ) {
-//     //Well when we call next with an error passed as an argument, then we actually let express know that
-//     // an error occurred and it will skip all other middlewares and move right away to an error handling
-//     const error = new Error(err)
-//     error.httpStatusCode = 500;
-//     return next(error)
-//   };
-
-// };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// exports.getCheckout = async (req, res, next) => {  
-//   let products;
-//   let total = 0;
-
-//   try { 
-
-//     const user = await req.user.populate('cart.items.productId');
-
-//     products = user.cart.items;
-//     total = 0;
-
-//     products.forEach(p => {
-//       total += p.quantity * p.productId.price;
-//     });
-
-//     const session = await stripe.checkout.sessions.create({
-
-//       payment_method_types: ['card'],
-//       mode: 'payment',
-//       line_items: products.map(p => {
-//         return {
-
-//           price_data:{
-            
-//             product_data: {
-//               name: p.productId.title,
-//               description: p.productId.description
+//         const products = user.cart.items.map(i => {
+//             return ({ product: { ...i.productId }, quantity: i.quantity }); // here productId  is the name of the whole product data because we named it like that in the user model .. just to keep in mind 
+//         })
+        
+//         const order = new Order({ 
+//             user: {
+//                 email: user.email,
+//                 userId: req.userId
 //             },
+            
+//             items: products
+//         });
 
-//             currency: 'usd',
+//         await order.save();
+    
+//         user.cart = { items: [] };
 
-//             unit_amount:p.productId.price * 100
+//         await user.save();
+        
 
-//           },
+//         // just to remember what the front-end should do
+//         // res.redirect('/orders');
+        
+//         res.status(201).json({
+//             message: 'Order created successfully',
+//             order: order
+//         });
 
-//           quantity: p.quantity
-//         };
-
-//       }),
-
-//       /*            NOTE VIDEO 357
-//       Relying only on `success_url` is insecure since users can access it without paying.
-//       For production, use Stripe **Webhooks** to verify successful payments; on localhost, manual verification via the Stripe Dashboard is sufficient.
-//       */
-//       success_url: req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
-//       cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
-//     });
-
-//     res.render('shop/checkout.ejs', {
-//       pageTitle:'Checkout',
-//       path: '/checkout',
-//       products: products,
-//       totalSum: total,
-//       sessionId: session.id,
-//       stripePublishableKey: process.env.STRIPE_PUBLISH_KEY
-//     });
-
-//   }
-//   catch(err )  {
-//       //Well when we call next with an error passed as an argument, then we actually let express know that
-//       // an error occurred and it will skip all other middlewares and move right away to an error handling
-//       console.log(err);
-//       const error = new Error(err)
-//       error.httpStatusCode = 500;
-//       return next(error)
-//   };
+//     }
+//     catch ( err ) {
+//         if(!err.statusCode){
+//             err.statusCode = 500;
+//         }
+//         next(err);
+//     };
 // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.getOrders = async (req, res, next) => {
+
+    try { 
+
+        const orders = await Order.find({ 'user.userId': req.userId });
+        console.log(orders);
+
+        res.status(200).json({
+            message: 'Fetched Orders successfully',
+            orders: orders
+        })
+    }
+    catch ( err ) {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    };
+
+};
+
+
+
+
+
+
+
+
+
 
 
 

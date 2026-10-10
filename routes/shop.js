@@ -17,22 +17,26 @@ router.get(['/', '/products'], shopController.getProducts);
 
 router.get( '/products/:productId', shopController.getProduct );
 
-// router.get( '/cart', isAuth, shopController.getCart );
+router.get( '/cart', isAuth, shopController.getCart );
 
-// router.post( '/cart', isAuth, shopController.postCart );
+router.post( '/cart', isAuth, shopController.postCart );
 
-// router.post( '/cart-delete-item', isAuth, shopController.postCartDeleteProduct );
+router.delete( '/cart-delete-item', isAuth, shopController.deleteCartItem );
 
-// router.get( '/checkout', isAuth, shopController.getCheckout);
 
-// router.get('/checkout/success', shopController.getCheckoutSuccess);
 
-// router.get('/checkout/cancel', shopController.getCheckout);
 
-// // after video 357 we dont need that ( after added /checkout/success and /checkout/cancel )
-// //router.post('/create-order', isAuth, shopController.postOrder);
+// router.post( '/checkout', isAuth, shopController.createCheckoutSession);
 
-// router.get( '/orders', isAuth, shopController.getOrders );
+
+// router.post('/checkout/success', shopController.postOrder);
+
+// router.get('/checkout/cancel', shopController.createCheckoutSession);
+
+// after video 357 we dont need that ( after added /checkout/success and /checkout/cancel )
+//router.post('/create-order', isAuth, shopController.postOrder);
+
+router.get( '/orders', isAuth, shopController.getOrders );
 
 // router.get('/orders/:orderId', isAuth, shopController.getInvoice);
 
