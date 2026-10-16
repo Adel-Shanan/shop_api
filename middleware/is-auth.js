@@ -30,7 +30,6 @@ module.exports = (req, res, next) => {
     }
 
     // if we passed to here we know that we have a valid token however and that we able to decode it
-
     // we will store the user id in the request so that i can use it in other places where request will go like in the routes 
     req.userId = decodedToken.userId;
 

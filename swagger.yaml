@@ -215,6 +215,19 @@ components:
           type: integer
           description: Number of products owned by the authenticated user
           example: 5
+          
+    CartItem:
+      type: object
+      properties:
+        productId:
+          allOf:
+            - $ref: '#/components/schemas/Product'
+          description: Populated product details returned by the cart endpoint
+        quantity:
+          type: integer
+          description: Quantity of this product in the cart
+          example: 2
+
 
 
 paths:
@@ -315,6 +328,149 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+
+
+
+
+
+  /cart:
+    get:
+      tags:
+        - Shop
+      summary: Get authenticated user's cart
+      description: Returns the products and quantities in the authenticated user's cart. Requires a valid JWT.
+      operationId: getCart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cart fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cart Fetched Successfully
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CartItem'
+        '401':
+          description: Authentication failed or user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Shop
+      summary: Add a product to the cart
+      description: Adds the specified product to the authenticated user's cart. Requires a valid JWT.
+      operationId: addToCart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  description: MongoDB ObjectId of the product to add
+                  example: 68c123456789abcdef123456
+      responses:
+        '201':
+          description: Product added to cart successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: the product has been added to the cart!
+                  product:
+                    $ref: '#/components/schemas/Product'
+        '401':
+          description: Authentication failed or user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cart-delete-item:
+    delete:
+      tags:
+        - Shop
+      summary: Remove a product from the cart
+      description: Removes the specified product from the authenticated user's cart. Requires a valid JWT.
+      operationId: deleteCartItem
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  description: MongoDB ObjectId of the product to remove
+                  example: 68c123456789abcdef123456
+      responses:
+        '200':
+          description: Product deleted from cart successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted from the cart successfully
+        '401':
+          description: Authentication failed or user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 
 
   /signup:
